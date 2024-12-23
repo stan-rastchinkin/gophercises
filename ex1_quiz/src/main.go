@@ -8,10 +8,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
+
+const DEFAULT_TIMEOUT = 30
 
 type config struct {
 	problemsFilePath string
+	timeoutInSeconds int
 }
 
 type problem struct {
@@ -51,7 +55,7 @@ func parseData(data []byte) []problem {
 	return parsedProblems
 }
 
-func playGame(problems []problem) (gameResult, error) {
+func playGame(problems []problem, responseChannel chan<- gameResult, errorChannel chan<- error) {
 	gameResult := gameResult{
 		correctAnswers:    0,
 		incorrectAnswers:  0,
@@ -62,11 +66,11 @@ func playGame(problems []problem) (gameResult, error) {
 		var userAnswer string
 		_, err := fmt.Printf("Problem #%d: %s = ", i+1, problem.question)
 		if err != nil {
-			return gameResult, err
+			errorChannel <- err
 		}
 		_, err = fmt.Scanln(&userAnswer)
 		if err != nil {
-			return gameResult, err
+			errorChannel <- err
 		}
 		if userAnswer == problem.answer {
 			gameResult.correctAnswers++
@@ -75,13 +79,14 @@ func playGame(problems []problem) (gameResult, error) {
 		}
 	}
 
-	return gameResult, nil
+	responseChannel <- gameResult
 }
 
 func main() {
 	var config config
 
-	flag.StringVar(&config.problemsFilePath, "file_path", "data/problems.csv", "Specify path to the file with questions")
+	flag.StringVar(&config.problemsFilePath, "file_path", "data/problems.csv", "Path to the file with questions (optional)")
+	flag.IntVar(&config.timeoutInSeconds, "timeout", DEFAULT_TIMEOUT, fmt.Sprintf("Timeout. Defaults to %d seconds", DEFAULT_TIMEOUT))
 	flag.Parse()
 
 	absPath, err := filepath.Abs(config.problemsFilePath)
@@ -92,8 +97,20 @@ func main() {
 
 	problems := parseData(data)
 
-	gameResult, err := playGame(problems)
-	checkErr(err)
+	responseChannel := make(chan gameResult)
+	errorChannel := make(chan error)
+	go playGame(problems, responseChannel, errorChannel)
+	timer := time.NewTimer(time.Duration(config.timeoutInSeconds) * time.Second)
 
-	fmt.Printf("You scored %d out of %d", gameResult.correctAnswers, gameResult.numberOfQuestions)
+	select {
+	case gameResult := <-responseChannel:
+		fmt.Printf("You scored %d out of %d", gameResult.correctAnswers, gameResult.numberOfQuestions)
+	case err := <-errorChannel:
+		panic(err)
+	case <-timer.C:
+		fmt.Println("\nOut of time!")
+	}
+
+	close(responseChannel)
+	close(errorChannel)
 }
