@@ -55,13 +55,7 @@ func parseData(data []byte) []problem {
 	return parsedProblems
 }
 
-func playGame(problems []problem, responseChannel chan<- gameResult, errorChannel chan<- error) {
-	gameResult := gameResult{
-		correctAnswers:    0,
-		incorrectAnswers:  0,
-		numberOfQuestions: uint(len(problems)),
-	}
-
+func playGame(problems []problem, gameResult *gameResult, doneChannel chan<- bool, errorChannel chan<- error) {
 	for i, problem := range problems {
 		var userAnswer string
 		_, err := fmt.Printf("Problem #%d: %s = ", i+1, problem.question)
@@ -79,7 +73,7 @@ func playGame(problems []problem, responseChannel chan<- gameResult, errorChanne
 		}
 	}
 
-	responseChannel <- gameResult
+	doneChannel <- true
 }
 
 func main() {
@@ -97,20 +91,29 @@ func main() {
 
 	problems := parseData(data)
 
-	responseChannel := make(chan gameResult)
+	doneChannel := make(chan bool)
 	errorChannel := make(chan error)
-	go playGame(problems, responseChannel, errorChannel)
+	gameResult := gameResult{
+		correctAnswers:    0,
+		incorrectAnswers:  0,
+		numberOfQuestions: uint(len(problems)),
+	}
+
+	go playGame(problems, &gameResult, doneChannel, errorChannel)
 	timer := time.NewTimer(time.Duration(config.timeoutInSeconds) * time.Second)
 
 	select {
-	case gameResult := <-responseChannel:
-		fmt.Printf("You scored %d out of %d", gameResult.correctAnswers, gameResult.numberOfQuestions)
+	case isDone := <-doneChannel:
+		if isDone {
+			fmt.Printf("You scored %d out of %d", gameResult.correctAnswers, gameResult.numberOfQuestions)
+		}
 	case err := <-errorChannel:
 		panic(err)
 	case <-timer.C:
 		fmt.Println("\nOut of time!")
+		fmt.Printf("You scored %d out of %d", gameResult.correctAnswers, gameResult.numberOfQuestions)
 	}
 
-	close(responseChannel)
+	close(doneChannel)
 	close(errorChannel)
 }
