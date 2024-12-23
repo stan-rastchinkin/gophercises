@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,14 +33,18 @@ func checkErr(err error) {
 }
 
 func parseData(data []byte) []problem {
-	unparsedProblemSlice := strings.Split(string(data), "\n")
+	reader := csv.NewReader(strings.NewReader(string(data)))
 
-	var parsedProblems = make([]problem, len(unparsedProblemSlice))
-	for i, unparsedProblem := range unparsedProblemSlice {
-		parsed := strings.Split(unparsedProblem, ",")
+	readRows, err := reader.ReadAll()
+	var parsedProblems = make([]problem, len(readRows))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i, row := range readRows {
 		parsedProblems[i] = problem{
-			question: parsed[0],
-			answer:   parsed[1],
+			question: row[0],
+			answer:   row[1],
 		}
 	}
 
