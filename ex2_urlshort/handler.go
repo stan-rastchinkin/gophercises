@@ -3,14 +3,8 @@ package urlshort
 import (
 	"net/http"
 
-	yaml "github.com/go-yaml/yaml"
+	config "github.com/sharkstoned/gophercises/urlshort/config"
 )
-
-// TODO: purpose of these quotes, last column?
-type UnmarshalledYamlItem struct {
-	Path string `yaml:"path"`
-	Url  string `yaml:"url"`
-}
 
 // MapHandler will return an http.HandlerFunc (which also
 // implements http.Handler) that will attempt to map any
@@ -18,7 +12,7 @@ type UnmarshalledYamlItem struct {
 // that each key in the map points to, in string format).
 // If the path is not provided in the map, then the fallback
 // http.Handler will be called instead.
-func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
+func MapHandler(pathsToUrls config.Config, fallback http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		redirectUrl, pathExists := pathsToUrls[r.URL.Path]
 
@@ -29,49 +23,3 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 		}
 	}
 }
-
-// YAMLHandler will parse the provided YAML and then return
-// an http.HandlerFunc (which also implements http.Handler)
-// that will attempt to map any paths to their corresponding
-// URL. If the path is not provided in the YAML, then the
-// fallback http.Handler will be called instead.
-//
-// YAML is expected to be in the format:
-//
-//   - path: /some-path
-//     url: https://www.some-url.com/demo
-//
-// The only errors that can be returned all related to having
-// invalid YAML data.
-//
-// See MapHandler to create a similar http.HandlerFunc via
-// a mapping of paths to urls.
-func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	parsed, err := parseYaml(yml)
-	if err != nil {
-		return nil, err
-	}
-
-	return MapHandler(buildPathMap(parsed), fallback), nil
-}
-
-func parseYaml(yml []byte) ([]UnmarshalledYamlItem, error) {
-	var unmarshalled []UnmarshalledYamlItem
-	err := yaml.UnmarshalStrict(yml, &unmarshalled)
-	if err != nil {
-		return nil, err
-	}
-
-	return unmarshalled, nil
-}
-
-func buildPathMap(parsed []UnmarshalledYamlItem) map[string]string {
-	pathMap := make(map[string]string)
-	for _, item := range parsed {
-		pathMap[item.Path] = item.Url
-	}
-
-	return pathMap
-}
-
-// TODO: discover the possibilities of go mod (tidy?)

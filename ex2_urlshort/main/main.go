@@ -6,34 +6,34 @@ import (
 	"os"
 
 	"github.com/sharkstoned/gophercises/urlshort"
+	config "github.com/sharkstoned/gophercises/urlshort/config"
 )
 
 func main() {
 	mux := defaultMux()
 
-	// Build the MapHandler using the mux as the fallback
-	pathsToUrls := map[string]string{
-		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
-		"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
-	}
-	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
+	// // Build the MapHandler using the mux as the fallback
+	// pathsToUrls := map[string]string{
+	// 	"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
+	// 	"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
+	// }
 
 	// Build the YAMLHandler using the mapHandler as the
 	// fallback
-	yaml, err := loadYamlConfig("./config.yaml")
-	if err != nil {
-		panic(err)
-	}
-	yamlHandler, err := urlshort.YAMLHandler([]byte(yaml), mapHandler)
-	if err != nil {
-		panic(err)
-	}
+	configData, err := readFile("./config.yaml")
+	panicIfError(err)
+
+	config, err := config.LoadYamlConfig(configData)
+	panicIfError(err)
+
+	handler := urlshort.MapHandler(config, mux)
+
 	fmt.Println("Starting the server on :8080")
 
-	http.ListenAndServe(":8080", yamlHandler)
+	http.ListenAndServe(":8080", handler)
 }
 
-func loadYamlConfig(pathToFile string) ([]byte, error) {
+func readFile(pathToFile string) ([]byte, error) {
 	// This is a very basic method that loads the whole file into memory
 	// Opening file, reading it line-by-line and closing can make more sense
 	// memory-wise in a differet case
@@ -43,6 +43,12 @@ func loadYamlConfig(pathToFile string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+func panicIfError(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
 
 func defaultMux() *http.ServeMux {
