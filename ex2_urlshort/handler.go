@@ -47,18 +47,31 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 // See MapHandler to create a similar http.HandlerFunc via
 // a mapping of paths to urls.
 func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	parsed, err := parseYaml(yml)
+	if err != nil {
+		return nil, err
+	}
+
+	return MapHandler(buildPathMap(parsed), fallback), nil
+}
+
+func parseYaml(yml []byte) ([]UnmarshalledYamlItem, error) {
 	var unmarshalled []UnmarshalledYamlItem
 	err := yaml.UnmarshalStrict(yml, &unmarshalled)
 	if err != nil {
 		return nil, err
 	}
 
+	return unmarshalled, nil
+}
+
+func buildPathMap(parsed []UnmarshalledYamlItem) map[string]string {
 	pathMap := make(map[string]string)
-	for _, item := range unmarshalled {
+	for _, item := range parsed {
 		pathMap[item.Path] = item.Url
 	}
 
-	return MapHandler(pathMap, fallback), nil
+	return pathMap
 }
 
 // TODO: discover the possibilities of go mod (tidy?)
