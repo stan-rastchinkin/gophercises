@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,23 +11,50 @@ import (
 )
 
 func main() {
-	mux := defaultMux()
+	var confPath, confFormat string
+	flag.StringVar(&confPath, "c", "", "Path to json or yaml config")
+	flag.StringVar(&confFormat, "f", "", "Config format (yaml|json)")
 
-	// // Build the MapHandler using the mux as the fallback
+	flag.Parse()
+
+	if confPath == "" {
+		fmt.Println("No path to config file provided")
+		os.Exit(1)
+	}
+	if confFormat == "" {
+		fmt.Println("No format for config is provided")
+		os.Exit(1)
+	}
+
+	// Put this rules into Bbolt
+
 	// pathsToUrls := map[string]string{
 	// 	"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
 	// 	"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
 	// }
 
-	// Build the YAMLHandler using the mapHandler as the
-	// fallback
-	configData, err := readFile("./config.yaml")
-	panicIfError(err)
+	var rules config.Config
 
-	config, err := config.LoadYamlConfig(configData)
-	panicIfError(err)
+	switch confFormat {
+	case "yaml":
+		configData, err := readFile(confPath)
+		panicIfError(err)
 
-	handler := urlshort.MapHandler(config, mux)
+		rules, err = config.LoadYamlConfig(configData)
+		panicIfError(err)
+
+	case "json":
+		configData, err := readFile(confPath)
+		panicIfError(err)
+
+		rules, err = config.LoadJsonConfig(configData)
+		panicIfError(err)
+	default:
+		fmt.Printf("Unknown config format %s", confFormat)
+		os.Exit(1)
+	}
+
+	handler := urlshort.MapHandler(rules, defaultMux())
 
 	fmt.Println("Starting the server on :8080")
 
