@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/sharkstoned/gophercises/urlshort"
 )
@@ -19,12 +20,10 @@ func main() {
 
 	// Build the YAMLHandler using the mapHandler as the
 	// fallback
-	yaml := `
-- path: /urlshort
-  url: https://github.com/gophercises/urlshort
-- path: /urlshort-final
-  url: https://github.com/gophercises/urlshort/tree/solution
-`
+	yaml, err := loadYamlConfig("./config.yaml")
+	if err != nil {
+		panic(err)
+	}
 	yamlHandler, err := urlshort.YAMLHandler([]byte(yaml), mapHandler)
 	if err != nil {
 		panic(err)
@@ -32,6 +31,18 @@ func main() {
 	fmt.Println("Starting the server on :8080")
 
 	http.ListenAndServe(":8080", yamlHandler)
+}
+
+func loadYamlConfig(pathToFile string) ([]byte, error) {
+	// This is a very basic method that loads the whole file into memory
+	// Opening file, reading it line-by-line and closing can make more sense
+	// memory-wise in a differet case
+	data, err := os.ReadFile(pathToFile)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 func defaultMux() *http.ServeMux {
