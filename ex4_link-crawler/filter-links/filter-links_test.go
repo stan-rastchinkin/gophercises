@@ -57,20 +57,12 @@ func TestFilterLinks(t *testing.T) {
 			},
 		},
 		{
-			name:            "ex 3",
-			fixtureFileName: "ex3.html",
+			name:            "ex 4",
+			fixtureFileName: "ex4.html",
 			expected: []*Link{
 				{
-					Href: "#",
-					Text: "Login",
-				},
-				{
-					Href: "/lost",
-					Text: "Lost? Need help?",
-				},
-				{
-					Href: "https://twitter.com/marcusolsson",
-					Text: "@marcusolsson",
+					Href: "/dog-cat",
+					Text: "dog cat",
 				},
 			},
 		},

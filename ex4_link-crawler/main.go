@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	doc := utils.OpenAndParseHtmlFile("./filter-links/fixtures/ex3.html")
+	doc := utils.OpenAndParseHtmlFile("./filter-links/fixtures/ex4.html")
 
 	links := linkfilter.FilterLinks(doc)
 
