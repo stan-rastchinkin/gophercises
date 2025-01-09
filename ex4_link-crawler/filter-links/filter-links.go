@@ -44,12 +44,30 @@ func getNodeInnerText(node *html.Node) string {
 		}
 	}
 
-	concatenated := strings.Join(fragments, "")
-	re := regexp.MustCompile(`\W*(?P<result>.*)\W*`)
-	matches := re.FindStringSubmatch(concatenated)
+	return trimStringWithNativeTools(
+		strings.Join(fragments, ""),
+	)
+}
+
+// Complecated and doesn't trim spaces at end of the group
+func trimStringWithRegexGroup(input string) string {
+	re := regexp.MustCompile(`\W*(?P<result>.+)\W*`)
+	matches := re.FindStringSubmatch(input)
 	groups := re.SubexpNames()
 
 	idx := slices.IndexFunc(groups, func(el string) bool { return el == "result" })
 
 	return matches[idx]
+}
+
+// Better regex solution - alternatives
+// also \s == [\r\n\t\f\v]
+func trimStringWithRegexAlternatives(input string) string {
+	re := regexp.MustCompile(`^\s+|\s+$`)
+
+	return re.ReplaceAllString(input, "")
+}
+
+func trimStringWithNativeTools(input string) string {
+	return strings.TrimSpace(input)
 }

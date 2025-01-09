@@ -38,6 +38,42 @@ func TestFilterLinks(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:            "ex 3",
+			fixtureFileName: "ex3.html",
+			expected: []*Link{
+				{
+					Href: "#",
+					Text: "Login",
+				},
+				{
+					Href: "/lost",
+					Text: "Lost? Need help?",
+				},
+				{
+					Href: "https://twitter.com/marcusolsson",
+					Text: "@marcusolsson",
+				},
+			},
+		},
+		{
+			name:            "ex 3",
+			fixtureFileName: "ex3.html",
+			expected: []*Link{
+				{
+					Href: "#",
+					Text: "Login",
+				},
+				{
+					Href: "/lost",
+					Text: "Lost? Need help?",
+				},
+				{
+					Href: "https://twitter.com/marcusolsson",
+					Text: "@marcusolsson",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
