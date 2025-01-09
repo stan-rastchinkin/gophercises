@@ -1,7 +1,9 @@
 package filterlinks
 
 import (
+	"regexp"
 	"slices"
+	"strings"
 
 	html "golang.org/x/net/html"
 )
@@ -25,10 +27,29 @@ func FilterLinks(parsedTree *html.Node) []*Link {
 
 			links = append(links, &Link{
 				Href: hrefAttribute.Val,
-				Text: n.FirstChild.Data,
+				Text: getNodeInnerText(n),
 			})
 		}
 	}
 
 	return links
+}
+
+func getNodeInnerText(node *html.Node) string {
+	var fragments []string
+
+	for n := range node.Descendants() {
+		if n.Type == html.TextNode {
+			fragments = append(fragments, n.Data)
+		}
+	}
+
+	concatenated := strings.Join(fragments, "")
+	re := regexp.MustCompile(`\W*(?P<result>.*)\W*`)
+	matches := re.FindStringSubmatch(concatenated)
+	groups := re.SubexpNames()
+
+	idx := slices.IndexFunc(groups, func(el string) bool { return el == "result" })
+
+	return matches[idx]
 }

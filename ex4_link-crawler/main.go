@@ -8,11 +8,11 @@ import (
 )
 
 func main() {
-	doc := utils.OpenAndParseHtmlFile("./test/ex1.html")
+	doc := utils.OpenAndParseHtmlFile("./filter-links/fixtures/ex2.html")
 
 	links := linkfilter.FilterLinks(doc)
 
 	for _, l := range links {
-		fmt.Printf("l: %v\n", *l)
+		fmt.Printf("l: %+v\n", *l)
 	}
 }
