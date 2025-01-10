@@ -1,4 +1,4 @@
-module linkcrawler
+module linkparser
 
 go 1.23.4
 

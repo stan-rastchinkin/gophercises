@@ -1,7 +1,7 @@
 package filterlinks
 
 import (
-	"linkcrawler/utils"
+	"linkparser/utils"
 	"path/filepath"
 	"testing"
 )

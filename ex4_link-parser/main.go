@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	linkfilter "linkcrawler/filter-links"
-	utils "linkcrawler/utils"
+	linkfilter "linkparser/filter-links"
+	utils "linkparser/utils"
 )
 
 func main() {
