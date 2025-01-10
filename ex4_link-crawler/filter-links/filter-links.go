@@ -36,17 +36,15 @@ func FilterLinks(parsedTree *html.Node) []*Link {
 }
 
 func getNodeInnerText(node *html.Node) string {
-	var fragments []string
+	var concatenated string
 
 	for n := range node.Descendants() {
 		if n.Type == html.TextNode {
-			fragments = append(fragments, n.Data)
+			concatenated += n.Data
 		}
 	}
 
-	return trimStringWithNativeTools(
-		strings.Join(fragments, ""),
-	)
+	return trimStringWithNativeTools(concatenated)
 }
 
 // Complecated and doesn't trim spaces at end of the group
