@@ -2,24 +2,31 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
+
+	filterlinks "linkparser/filter-links"
+
+	"golang.org/x/net/html"
 )
 
 func main() {
-	resp, err := http.Get("http://example.com")
+	resp, err := http.Get("https://www.iana.org/")
 	if err != nil {
 		fmt.Printf("Failed to fetch page: %e", err)
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	doc, err := html.Parse(resp.Body)
 	if err != nil {
-		fmt.Printf("Failed to read response body: %e", err)
+		fmt.Printf("Failed to parse response body: %e", err)
 		os.Exit(1)
 	}
 
-	fmt.Print(string(body))
+	links := filterlinks.FilterLinks(doc)
+
+	for _, link := range links {
+		fmt.Printf("links: %v\n", *link)
+	}
 }
