@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -39,7 +38,6 @@ func urlAddressToFilePath(urlAddress string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("\n%+v\n", u.Path)
 
 	basepath := path.Join("test-pages", u.Host)
 	pathToFile := "index.html"
@@ -48,4 +46,41 @@ func urlAddressToFilePath(urlAddress string) (string, error) {
 	}
 
 	return path.Join(basepath, pathToFile), nil
+}
+
+type NormalizeLinkAddressFunc func(urlAddress string) (string, error)
+
+func LinkAddressNormalizerFactory(baseUrl string) NormalizeLinkAddressFunc {
+	return func(urlAddress string) (string, error) {
+		u, err := url.Parse(urlAddress)
+		if err != nil {
+			return "", err
+		}
+
+		if u.Host == "" {
+			return url.JoinPath(baseUrl, u.Path)
+		}
+
+		return urlAddress, nil
+	}
+}
+
+type FilterSameOriginLinksFunc func(urlAddress string) (bool, error)
+
+func FilterSameOriginLinksFactory(baseUrl string) (FilterSameOriginLinksFunc, error) {
+	parsedBaseUrl, err := url.Parse(baseUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	productFunc := func(urlAddress string) (bool, error) {
+		parsedUrl, err := url.Parse(urlAddress)
+		if err != nil {
+			return false, err
+		}
+
+		return parsedUrl.Host == parsedBaseUrl.Host, nil
+	}
+
+	return productFunc, nil
 }

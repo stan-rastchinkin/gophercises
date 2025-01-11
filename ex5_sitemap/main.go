@@ -22,7 +22,7 @@ type ProgramConfig struct {
 func main() {
 	links := program(&ProgramConfig{
 		getReader:   utils.GetReaderFromLocalFs,
-		siteHomeUrl: "http://www.iana.org",
+		siteHomeUrl: "https://www.iana.org/",
 	})
 
 	for _, link := range links {
@@ -31,18 +31,23 @@ func main() {
 }
 
 func program(config *ProgramConfig) []*filterlinks.Link {
+	normalizeLinkAddress := utils.LinkAddressNormalizerFactory(config.siteHomeUrl)
+	sameOriginFilter, err := utils.FilterSameOriginLinksFactory(config.siteHomeUrl)
+	handleError(err, "Failed to create same origin filter")
+
 	pageReader, err := config.getReader(config.siteHomeUrl)
-	if err != nil {
-		fmt.Printf("Failed to fetch page: %e", err)
-		os.Exit(1)
-	}
+	handleError(err, "Failed to fetch page")
 	defer pageReader.Close()
 
 	doc, err := html.Parse(pageReader)
-	if err != nil {
-		fmt.Printf("Failed to parse response body: %e", err)
-		os.Exit(1)
-	}
+	handleError(err, "Failed to parse response body")
 
 	return filterlinks.FilterLinks(doc)
+}
+
+func handleError(err error, msg string) {
+	if err != nil {
+		fmt.Printf("%s: %e", msg, err)
+		os.Exit(1)
+	}
 }
