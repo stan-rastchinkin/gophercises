@@ -14,6 +14,7 @@ type ScrapePageFunc func(pageUrl string) []string
 
 func PageScrapperFactory(
 	normalizeLinkAddress utils.NormalizeLinkAddressFunc,
+	// todo: pass a generic filter that follows interface
 	sameOriginFilter utils.FilterSameOriginLinksFunc,
 	getReader utils.GetReaderFunc,
 ) ScrapePageFunc {

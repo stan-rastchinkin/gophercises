@@ -11,11 +11,11 @@ type SitemapNode struct {
 }
 
 func Traverse(
-	pageScrapper pagescrapper.ScrapePageFunc,
+	scrapePage pagescrapper.ScrapePageFunc,
 	url string,
 	parentNode *SitemapNode,
 ) *SitemapNode {
-	normalizedScrappedLinks := pageScrapper(url)
+	normalizedScrappedLinks := scrapePage(url)
 
 	currentNode := SitemapNode{
 		url:    url,
@@ -25,7 +25,7 @@ func Traverse(
 	var children []*SitemapNode
 	for _, nestedlink := range normalizedScrappedLinks {
 		children = append(children, Traverse(
-			pageScrapper,
+			scrapePage,
 			nestedlink,
 			&currentNode,
 		))
