@@ -22,7 +22,7 @@ type ProgramConfig struct {
 func main() {
 	links := program(&ProgramConfig{
 		getReader:   utils.GetReaderFromLocalFs,
-		siteHomeUrl: "https://www.asdf.org/",
+		siteHomeUrl: "https://www.iana.org/",
 	})
 
 	for _, link := range links {
@@ -59,18 +59,26 @@ func findLinksOnPage(
 	doc, err := html.Parse(pageReader)
 	handleErrorAndExit(err, "Failed to parse page")
 
-	var sameOriginLinksOnPage []string
+	// todo: cover with tests duplicate case
+	// remove duplicates
+	sameOriginLinksOnPageSet := map[string]struct{}{}
+
 	for _, link := range linkparser.FilterLinks(doc) {
 		normalizedLink, err := normalizeLinkAddress(link.Href)
 		handleErrorAndExit(err, fmt.Sprintf("Failed to normalize link %s", link.Href))
 		isSameOrigin, err := sameOriginFilter(normalizedLink)
 		handleErrorAndExit(err, fmt.Sprintf("Same origin filter failed on link %s", normalizedLink))
 		if isSameOrigin {
-			sameOriginLinksOnPage = append(sameOriginLinksOnPage, normalizedLink)
+			sameOriginLinksOnPageSet[normalizedLink] = struct{}{}
 		}
 	}
 
-	return sameOriginLinksOnPage
+	var result []string
+	for link := range sameOriginLinksOnPageSet {
+		result = append(result, link)
+	}
+
+	return result
 }
 
 func handleErrorAndExit(err error, msg string) {
