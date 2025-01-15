@@ -24,7 +24,7 @@ func main() {
 	})
 
 	fmt.Println("\nResult:")
-	fmt.Print(tree.RenderToString(sitemap, 0))
+	fmt.Print(tree.RenderToString(sitemap, 0, make(map[string]tree.RegistryLog)))
 }
 
 func program(config *ProgramConfig) *tree.SitemapNode {
@@ -42,6 +42,7 @@ func program(config *ProgramConfig) *tree.SitemapNode {
 		scrapeLinksOnPage,
 		config.siteHomeUrl,
 		nil,
+		make(map[string]*tree.SitemapNode),
 	)
 }
 
