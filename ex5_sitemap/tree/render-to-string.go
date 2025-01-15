@@ -10,7 +10,15 @@ type RegistryLog struct {
 	level uint
 }
 
-func RenderToString(
+func RenderToString(node *SitemapNode) string {
+	return renderToString(
+		node,
+		0,
+		make(map[string]RegistryLog),
+	)
+}
+
+func renderToString(
 	node *SitemapNode,
 	level uint,
 	processedNodesRegestry map[string]RegistryLog,
@@ -25,7 +33,7 @@ func RenderToString(
 	result := fmt.Sprintf("level %d:\n", level) + node.url + "\n\n"
 
 	for _, child := range node.children {
-		result += RenderToString(child, level+1, processedNodesRegestry)
+		result += renderToString(child, level+1, processedNodesRegestry)
 	}
 
 	processedNodesRegestry[node.url] = RegistryLog{
