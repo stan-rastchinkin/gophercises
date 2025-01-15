@@ -27,18 +27,19 @@ func renderToString(
 		return fmt.Sprintf("level %d:\n", level) +
 			node.url +
 			"\nNote: This Node is already rendered at level " +
-			strconv.FormatUint(uint64(processedNode.level), 10)
+			strconv.FormatUint(uint64(processedNode.level), 10) +
+			"\n\n"
 	}
 
 	result := fmt.Sprintf("level %d:\n", level) + node.url + "\n\n"
 
-	for _, child := range node.children {
-		result += renderToString(child, level+1, processedNodesRegestry)
-	}
-
 	processedNodesRegestry[node.url] = RegistryLog{
 		node:  node,
 		level: level,
+	}
+
+	for _, child := range node.children {
+		result += renderToString(child, level+1, processedNodesRegestry)
 	}
 
 	return result

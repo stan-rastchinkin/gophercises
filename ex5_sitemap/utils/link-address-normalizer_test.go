@@ -23,6 +23,18 @@ func TestLinkAddressNormalizerFactory(t *testing.T) {
 			inputLink: "http://example.com/asdf/qwer",
 			expected:  "http://example.com/asdf/qwer",
 		},
+		{
+			name:      "Only host is provided",
+			baseHost:  "http://example.com/",
+			inputLink: "http://example.com/",
+			expected:  "http://example.com/",
+		},
+		{
+			name:      "Only host w/o trailing slash",
+			baseHost:  "http://example.com/",
+			inputLink: "http://example.com",
+			expected:  "http://example.com/",
+		},
 	}
 
 	for _, tt := range tests {

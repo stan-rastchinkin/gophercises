@@ -7,15 +7,15 @@ import (
 
 func LinkAddressNormalizerFactory(baseUrl string) pagescrapper.NormalizeLinkAddressFunc {
 	return func(urlAddress string) (string, error) {
-		u, err := url.Parse(urlAddress)
+		parsedUrl, err := url.Parse(urlAddress)
 		if err != nil {
 			return "", err
 		}
 
-		if u.Host == "" {
-			return url.JoinPath(baseUrl, u.Path)
+		if parsedUrl.Host == "" {
+			return url.JoinPath(baseUrl, parsedUrl.Path)
 		}
 
-		return urlAddress, nil
+		return url.JoinPath(urlAddress)
 	}
 }
