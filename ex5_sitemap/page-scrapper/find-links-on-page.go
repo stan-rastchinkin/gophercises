@@ -3,21 +3,19 @@ package pagescrapper
 import (
 	"fmt"
 	"os"
-	"sitemap/utils"
 
 	"golang.org/x/net/html"
 
 	linkparser "linkparser/filter-links"
+	tree "sitemap/tree"
 )
 
-type ScrapePageFunc func(pageUrl string) []string
-
 func PageScrapperFactory(
-	normalizeLinkAddress utils.NormalizeLinkAddressFunc,
+	normalizeLinkAddress NormalizeLinkAddressFunc,
 	// todo: pass a generic filter that follows interface
-	sameOriginFilter utils.FilterSameOriginLinksFunc,
-	getReader utils.GetReaderFunc,
-) ScrapePageFunc {
+	sameOriginFilter LinksFilterFunc,
+	getReader GetReaderFunc,
+) tree.ScrapePageFunc {
 
 	return func(
 		pageUrl string,

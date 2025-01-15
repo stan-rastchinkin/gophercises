@@ -1,10 +1,11 @@
 package utils
 
-import "net/url"
+import (
+	"net/url"
+	pagescrapper "sitemap/page-scrapper"
+)
 
-type NormalizeLinkAddressFunc func(urlAddress string) (string, error)
-
-func LinkAddressNormalizerFactory(baseUrl string) NormalizeLinkAddressFunc {
+func LinkAddressNormalizerFactory(baseUrl string) pagescrapper.NormalizeLinkAddressFunc {
 	return func(urlAddress string) (string, error) {
 		u, err := url.Parse(urlAddress)
 		if err != nil {

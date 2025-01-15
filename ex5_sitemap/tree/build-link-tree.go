@@ -1,18 +1,26 @@
 package tree
 
-import (
-	pagescrapper "sitemap/page-scrapper"
-)
-
 type SitemapNode struct {
 	url      string
 	children []*SitemapNode
 	parent   *SitemapNode
 }
 
+func BuildLinkTree(
+	scrapePage ScrapePageFunc,
+	startingUrl string,
+) *SitemapNode {
+	return traverse(
+		scrapePage,
+		startingUrl,
+		nil,
+		make(map[string]*SitemapNode),
+	)
+}
+
 // TODO: TCO -- does it work here?
-func Traverse(
-	scrapePage pagescrapper.ScrapePageFunc,
+func traverse(
+	scrapePage ScrapePageFunc,
 	url string,
 	parentNode *SitemapNode,
 	processedLinksRegistry map[string]*SitemapNode,
@@ -31,7 +39,7 @@ func Traverse(
 		if existingNode, alreadyProcessed := processedLinksRegistry[nestedlink]; alreadyProcessed {
 			children = append(children, existingNode)
 		} else {
-			children = append(children, Traverse(
+			children = append(children, traverse(
 				scrapePage,
 				nestedlink,
 				&currentNode,

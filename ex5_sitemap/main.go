@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"os"
 
 	ps "sitemap/page-scrapper"
@@ -10,10 +9,8 @@ import (
 	"sitemap/utils"
 )
 
-type GetReaderFunc func(urlAddress string) (io.ReadCloser, error)
-
 type ProgramConfig struct {
-	getReader   utils.GetReaderFunc
+	getReader   ps.GetReaderFunc
 	siteHomeUrl string
 }
 
@@ -38,11 +35,9 @@ func program(config *ProgramConfig) *tree.SitemapNode {
 		config.getReader,
 	)
 
-	return tree.Traverse(
+	return tree.BuildLinkTree(
 		scrapeLinksOnPage,
 		config.siteHomeUrl,
-		nil,
-		make(map[string]*tree.SitemapNode),
 	)
 }
 

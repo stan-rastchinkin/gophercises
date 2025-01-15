@@ -2,11 +2,10 @@ package utils
 
 import (
 	"net/url"
+	pagescrapper "sitemap/page-scrapper"
 )
 
-type FilterSameOriginLinksFunc func(urlAddress string) (bool, error)
-
-func FilterSameOriginLinksFactory(baseUrl string) (FilterSameOriginLinksFunc, error) {
+func FilterSameOriginLinksFactory(baseUrl string) (pagescrapper.LinksFilterFunc, error) {
 	parsedBaseUrl, err := url.Parse(baseUrl)
 	if err != nil {
 		return nil, err
