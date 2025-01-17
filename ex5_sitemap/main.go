@@ -35,7 +35,7 @@ func program(config *ProgramConfig) *tree.SitemapNode {
 		config.getReader,
 	)
 
-	return tree.BuildLinkTree(
+	return tree.BuildLinkTreeBFS(
 		scrapeLinksOnPage,
 		config.siteHomeUrl,
 	)

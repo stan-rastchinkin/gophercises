@@ -20,6 +20,11 @@ type queueState[T any] struct {
 
 func (qs *queueState[T]) Pull() T {
 	el := qs.Front()
+	if el == nil {
+		var zero T
+
+		return zero
+	}
 	val := qs.Remove(el).(T) // type assertion
 
 	return val
