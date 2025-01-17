@@ -1,11 +1,5 @@
 package tree
 
-type SitemapNode struct {
-	url      string
-	children []*SitemapNode
-	parent   *SitemapNode
-}
-
 func BuildLinkTree(
 	scrapePage ScrapePageFunc,
 	startingUrl string,
@@ -18,7 +12,6 @@ func BuildLinkTree(
 	)
 }
 
-// TODO: TCO -- does it work here?
 func traverse(
 	scrapePage ScrapePageFunc,
 	url string,
