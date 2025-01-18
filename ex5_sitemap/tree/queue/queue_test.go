@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -16,6 +17,11 @@ func TestQueue(t *testing.T) {
 
 		for i := 1; i <= testElQty; i++ {
 			queue.Push(i)
+		}
+
+		items := queue.Peek()
+		if !reflect.DeepEqual(items, []int{1, 2, 3}) {
+			t.Errorf("Peek returned %v\n", items)
 		}
 
 		if queue.Len() != testElQty {

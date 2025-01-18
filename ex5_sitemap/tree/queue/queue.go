@@ -10,6 +10,7 @@ type Queue[T any] interface {
 	Pull() T
 	Push(T)
 	Len() int
+	Peek() []T
 	// Purge() -- TODO
 }
 
@@ -42,7 +43,17 @@ func (qs *queueState[T]) Push(element T) {
 // 	return qs.Len()
 // }
 
-// TODO: use generic types
+func (qs queueState[T]) Peek() []T {
+	var items []T
+	currentEl := qs.Front()
+
+	for currentEl != nil {
+		items = append(items, currentEl.Value.(T))
+		currentEl = currentEl.Next()
+	}
+
+	return items
+}
 
 // 3. Then we might think that all the methods
 // of List will be awailable on Queue
