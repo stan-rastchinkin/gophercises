@@ -72,7 +72,6 @@ func traverseBFS(
 	}
 	nodeQueue.Push(&rootNode)
 
-	// TODO: sometimes doesn't make it to the last node somehow
 	for {
 		node := nodeQueue.Pull()
 		if node == nil {
@@ -80,7 +79,7 @@ func traverseBFS(
 		}
 
 		if _, alreadyProcessed := processedLinksRegistry[node.url]; alreadyProcessed {
-			break
+			continue
 		}
 
 		for _, childLink := range scrapePage(node.url) {
