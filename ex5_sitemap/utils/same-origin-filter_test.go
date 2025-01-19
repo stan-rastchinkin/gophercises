@@ -33,12 +33,12 @@ func TestFilterSameOriginLinksFactory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			filter, err := FilterSameOriginLinksFactory(tt.baseUrl)
+			filter, err := NewSameOriginLinkFilter(tt.baseUrl)
 			if err != nil {
 				t.Errorf("%s:\n Received an error while creating an instance: %e", tt.name, err)
 			}
 
-			got, err := filter(tt.inputLink)
+			got, err := filter.IsPassing(tt.inputLink)
 			if err != nil {
 				t.Errorf("%s:\n Received an error: %e", tt.name, err)
 			}

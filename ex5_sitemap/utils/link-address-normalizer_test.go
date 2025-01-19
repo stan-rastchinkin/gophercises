@@ -39,8 +39,10 @@ func TestLinkAddressNormalizerFactory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			normalize := LinkAddressNormalizerFactory(tt.baseHost)
-			got, err := normalize(tt.inputLink)
+			normalizer := LinkNormalizer{
+				BaseUrl: tt.baseHost,
+			}
+			got, err := normalizer.Normalize(tt.inputLink)
 			if err != nil {
 				t.Errorf("%s:\n Received an error: %e", tt.name, err)
 			}

@@ -2,6 +2,12 @@ package pagescrapper
 
 import "io"
 
-type LinksFilterFunc func(urlAddress string) (bool, error)
-type NormalizeLinkAddressFunc func(urlAddress string) (string, error)
+type LinkNormalizer interface {
+	Normalize(string) (string, error)
+}
+
+type LinkFilter interface {
+	IsPassing(string) (bool, error)
+}
+
 type GetReaderFunc func(urlAddress string) (io.ReadCloser, error)

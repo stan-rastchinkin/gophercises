@@ -25,12 +25,12 @@ func main() {
 }
 
 func program(config *ProgramConfig) *tree.SitemapNode {
-	normalizeLink := utils.LinkAddressNormalizerFactory(config.siteHomeUrl)
-	sameOriginFilter, err := utils.FilterSameOriginLinksFactory(config.siteHomeUrl)
+	linkNormalizer := utils.LinkNormalizer{BaseUrl: config.siteHomeUrl}
+	sameOriginFilter, err := utils.NewSameOriginLinkFilter(config.siteHomeUrl)
 	handleErrorAndExit(err, "Failed to create same origin filter")
 
 	scrapeLinksOnPage := ps.PageScrapperFactory(
-		normalizeLink,
+		linkNormalizer,
 		sameOriginFilter,
 		config.getReader,
 	)

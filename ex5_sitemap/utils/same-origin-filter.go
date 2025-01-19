@@ -2,23 +2,26 @@ package utils
 
 import (
 	"net/url"
-	pagescrapper "sitemap/page-scrapper"
 )
 
-func FilterSameOriginLinksFactory(baseUrl string) (pagescrapper.LinksFilterFunc, error) {
+type SameOriginLinkFilter struct {
+	ParsedBaseUrl *url.URL
+}
+
+func (filter SameOriginLinkFilter) IsPassing(urlAddress string) (bool, error) {
+	parsedUrl, err := url.Parse(urlAddress)
+	if err != nil {
+		return false, err
+	}
+
+	return parsedUrl.Host == filter.ParsedBaseUrl.Host, nil
+}
+
+func NewSameOriginLinkFilter(baseUrl string) (SameOriginLinkFilter, error) {
 	parsedBaseUrl, err := url.Parse(baseUrl)
 	if err != nil {
-		return nil, err
+		return SameOriginLinkFilter{}, err
 	}
 
-	productFunc := func(urlAddress string) (bool, error) {
-		parsedUrl, err := url.Parse(urlAddress)
-		if err != nil {
-			return false, err
-		}
-
-		return parsedUrl.Host == parsedBaseUrl.Host, nil
-	}
-
-	return productFunc, nil
+	return SameOriginLinkFilter{ParsedBaseUrl: parsedBaseUrl}, nil
 }

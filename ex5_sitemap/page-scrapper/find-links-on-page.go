@@ -10,10 +10,15 @@ import (
 	tree "sitemap/tree"
 )
 
+// type PageScrapper struct {
+// 	normalizer LinkNormalizer
+// 	linkFilter LinkFilter
+// 	readerAccessor
+// }
+
 func PageScrapperFactory(
-	normalizeLinkAddress NormalizeLinkAddressFunc,
-	// todo: pass a generic filter that follows interface
-	sameOriginFilter LinksFilterFunc,
+	linkNormalizer LinkNormalizer,
+	linkFilter LinkFilter,
 	getReader GetReaderFunc,
 ) tree.ScrapePageFunc {
 
@@ -31,20 +36,20 @@ func PageScrapperFactory(
 
 		// todo: cover with tests duplicate case
 		// remove duplicates
-		sameOriginLinksOnPageSet := map[string]struct{}{}
+		linksOnPageSet := map[string]struct{}{}
 
 		for _, link := range linkparser.FilterLinks(doc) {
-			normalizedLink, err := normalizeLinkAddress(link.Href)
+			normalizedLink, err := linkNormalizer.Normalize(link.Href)
 			handleErrorAndExit(err, fmt.Sprintf("Failed to normalize link %s", link.Href))
-			isSameOrigin, err := sameOriginFilter(normalizedLink)
+			isPassing, err := linkFilter.IsPassing(normalizedLink)
 			handleErrorAndExit(err, fmt.Sprintf("Same origin filter failed on link %s", normalizedLink))
-			if isSameOrigin {
-				sameOriginLinksOnPageSet[normalizedLink] = struct{}{}
+			if isPassing {
+				linksOnPageSet[normalizedLink] = struct{}{}
 			}
 		}
 
 		var result []string
-		for link := range sameOriginLinksOnPageSet {
+		for link := range linksOnPageSet {
 			result = append(result, link)
 		}
 
