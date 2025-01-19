@@ -5,9 +5,7 @@ import (
 	"sitemap/tree/queue"
 )
 
-func RenderToString(
-	entryNode *SitemapNode,
-) string {
+func RenderToString(entryNode *SitemapNode) string {
 	nodeQueue := queue.New[*SitemapNode]()
 	processedUrls := map[string]struct{}{}
 
