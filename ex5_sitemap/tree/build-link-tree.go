@@ -9,36 +9,33 @@ func BuildLinkTreeDFS(
 	return traverseDFS(
 		scrapePage,
 		startingUrl,
-		nil,
 		make(map[string]*SitemapNode),
 	)
 }
 
+// Uses built-in stack
 func traverseDFS(
 	scrapePage ScrapePageFunc,
 	url string,
-	parentNode *SitemapNode,
-	processedLinksRegistry map[string]*SitemapNode,
+	processedLinks map[string]*SitemapNode,
 ) *SitemapNode {
 	normalizedScrappedLinks := scrapePage(url)
 
 	currentNode := SitemapNode{
-		url:    url,
-		parent: parentNode,
+		url: url,
 	}
 
-	processedLinksRegistry[url] = &currentNode
+	processedLinks[url] = &currentNode
 
 	var children []*SitemapNode
 	for _, nestedlink := range normalizedScrappedLinks {
-		if existingNode, alreadyProcessed := processedLinksRegistry[nestedlink]; alreadyProcessed {
+		if existingNode, alreadyProcessed := processedLinks[nestedlink]; alreadyProcessed {
 			children = append(children, existingNode)
 		} else {
 			children = append(children, traverseDFS(
 				scrapePage,
 				nestedlink,
-				&currentNode,
-				processedLinksRegistry,
+				processedLinks,
 			))
 		}
 
@@ -50,50 +47,39 @@ func traverseDFS(
 
 func BuildLinkTreeBFS(
 	scrapePage ScrapePageFunc,
-	startingUrl string,
-) *SitemapNode {
-	return traverseBFS(
-		scrapePage,
-		startingUrl,
-		make(map[string]*SitemapNode),
-	)
-}
-
-func traverseBFS(
-	scrapePage ScrapePageFunc,
-	url string,
-	processedLinksRegistry map[string]*SitemapNode,
+	startUrl string,
 ) *SitemapNode {
 	nodeQueue := queue.New[*SitemapNode]()
+	processedUrls := map[string]struct{}{}
 
-	rootNode := SitemapNode{
-		url:    url,
-		parent: nil,
+	rootNode := &SitemapNode{
+		url:      startUrl,
+		children: []*SitemapNode{},
 	}
-	nodeQueue.Push(&rootNode)
+	nodeQueue.Push(rootNode)
 
 	for {
-		node := nodeQueue.Pull()
-		if node == nil {
+		node, isEmpty := nodeQueue.Pull()
+		if isEmpty {
 			break
 		}
 
-		if _, alreadyProcessed := processedLinksRegistry[node.url]; alreadyProcessed {
+		if _, exists := processedUrls[node.url]; exists {
 			continue
 		}
 
-		for _, childLink := range scrapePage(node.url) {
+		for _, containedLink := range scrapePage(node.url) {
 			childNode := &SitemapNode{
-				url:    childLink,
-				parent: node,
+				url:      containedLink,
+				children: []*SitemapNode{},
 			}
-
 			node.children = append(node.children, childNode)
+
 			nodeQueue.Push(childNode)
 		}
 
-		processedLinksRegistry[node.url] = node
+		processedUrls[node.url] = struct{}{}
 	}
 
-	return &rootNode
+	return rootNode
 }
