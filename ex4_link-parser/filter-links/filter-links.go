@@ -19,11 +19,15 @@ func FilterLinks(parsedTree *html.Node) []*Link {
 	for n := range parsedTree.Descendants() {
 		if n.Type == html.ElementNode && n.Data == "a" {
 
-			hrefAttribute := n.Attr[slices.IndexFunc(
+			attrIndex := slices.IndexFunc(
 				n.Attr,
 				func(el html.Attribute) bool {
 					return el.Key == "href"
-				})]
+				})
+			if attrIndex == -1 {
+				continue // corrupted link w/o href
+			}
+			hrefAttribute := n.Attr[attrIndex]
 
 			links = append(links, &Link{
 				Href: hrefAttribute.Val,
