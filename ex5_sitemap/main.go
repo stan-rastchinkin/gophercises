@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	ps "sitemap/page-scrapper"
@@ -10,33 +11,34 @@ import (
 )
 
 type ProgramConfig struct {
-	getReader   ps.GetReaderFunc
 	siteHomeUrl string
+	getReader   func(string) (io.ReadCloser, error)
 }
 
 func main() {
-	sitemap := program(&ProgramConfig{
-		getReader:   utils.GetReaderFromLocalFs,
+	sitemapTree := program(&ProgramConfig{
 		siteHomeUrl: "https://www.test.org/",
+		getReader:   utils.GetReaderFromLocalFs,
 	})
 
+	fmt.Println("\nXML Result:")
+	fmt.Print(tree.RenderToXml(sitemapTree))
 	fmt.Println("\nResult:")
-	fmt.Print(tree.RenderToXml(sitemap))
+	fmt.Print(tree.RenderToString(sitemapTree))
 }
 
 func program(config *ProgramConfig) *tree.SitemapNode {
-	linkNormalizer := utils.LinkNormalizer{BaseUrl: config.siteHomeUrl}
 	sameOriginFilter, err := utils.NewSameOriginLinkFilter(config.siteHomeUrl)
 	handleErrorAndExit(err, "Failed to create same origin filter")
 
-	scrapeLinksOnPage := ps.PageScrapperFactory(
-		linkNormalizer,
-		sameOriginFilter,
-		config.getReader,
-	)
+	scrapper := ps.PageScrapper{
+		LinkNormalizer: utils.LinkNormalizer{BaseUrl: config.siteHomeUrl},
+		LinkFilter:     sameOriginFilter,
+		GetPageReader:  config.getReader,
+	}
 
 	return tree.BuildLinkTreeBFS(
-		scrapeLinksOnPage,
+		scrapper,
 		config.siteHomeUrl,
 	)
 }

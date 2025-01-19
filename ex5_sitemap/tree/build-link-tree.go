@@ -3,11 +3,11 @@ package tree
 import "sitemap/tree/queue"
 
 func BuildLinkTreeDFS(
-	scrapePage ScrapePageFunc,
+	pageScrapper PageScrapper,
 	startingUrl string,
 ) *SitemapNode {
 	return traverseDFS(
-		scrapePage,
+		pageScrapper,
 		startingUrl,
 		make(map[string]*SitemapNode),
 	)
@@ -15,11 +15,11 @@ func BuildLinkTreeDFS(
 
 // Uses built-in stack
 func traverseDFS(
-	scrapePage ScrapePageFunc,
+	pageScrapper PageScrapper,
 	url string,
 	processedLinks map[string]*SitemapNode,
 ) *SitemapNode {
-	normalizedScrappedLinks := scrapePage(url)
+	normalizedScrappedLinks := pageScrapper.GetLinks(url)
 
 	currentNode := SitemapNode{
 		url: url,
@@ -33,7 +33,7 @@ func traverseDFS(
 			children = append(children, existingNode)
 		} else {
 			children = append(children, traverseDFS(
-				scrapePage,
+				pageScrapper,
 				nestedlink,
 				processedLinks,
 			))
@@ -46,7 +46,7 @@ func traverseDFS(
 }
 
 func BuildLinkTreeBFS(
-	scrapePage ScrapePageFunc,
+	pageScrapper PageScrapper,
 	startUrl string,
 ) *SitemapNode {
 	nodeQueue := queue.New[*SitemapNode]()
@@ -68,7 +68,7 @@ func BuildLinkTreeBFS(
 			continue
 		}
 
-		for _, containedLink := range scrapePage(node.url) {
+		for _, containedLink := range pageScrapper.GetLinks(node.url) {
 			childNode := &SitemapNode{
 				url:      containedLink,
 				children: []*SitemapNode{},
