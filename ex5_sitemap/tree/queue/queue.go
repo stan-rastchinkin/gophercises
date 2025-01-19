@@ -7,11 +7,10 @@ import (
 // 4. But that's not the case:
 // our interface strictly defines what will be available
 type Queue[T any] interface {
-	Pull() T
+	Pull() (T, bool)
 	Push(T)
 	Len() int
 	Peek() []T
-	// Purge() -- TODO
 }
 
 // 1. This struct directly extends a List
@@ -19,16 +18,18 @@ type queueState[T any] struct {
 	*list.List
 }
 
-func (qs *queueState[T]) Pull() T {
+// Returns a queue element and removes it from the queue
+// The second parameter is true when there are no elements left in the queue
+func (qs *queueState[T]) Pull() (T, bool) {
 	el := qs.Front()
 	if el == nil {
 		var zero T
 
-		return zero
+		return zero, true
 	}
 	val := qs.Remove(el).(T) // type assertion
 
-	return val
+	return val, false
 }
 
 func (qs *queueState[T]) Push(element T) {

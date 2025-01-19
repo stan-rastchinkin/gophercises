@@ -28,30 +28,38 @@ func TestQueue(t *testing.T) {
 			t.Errorf("Incorrect length %d\n", queue.Len())
 		}
 
-		element := queue.Pull()
+		element, _ := queue.Pull()
 
 		if element != 1 {
 			t.Errorf("The element must be %d\n", 1)
 		}
 	})
 
-	t.Run("Pulling from empty queue returns zero value", func(t *testing.T) {
+	t.Run("Pulling from empty int queue", func(t *testing.T) {
 		intQueue := New[int]()
 
-		zeroEl1 := intQueue.Pull()
+		zeroEl, isEmpty := intQueue.Pull()
 
-		if zeroEl1 != 0 {
-			t.Errorf("zeroEl1 must be 0\n")
+		if zeroEl != 0 {
+			t.Errorf("zeroEl must be 0\n")
 		}
+		if !isEmpty {
+			t.Errorf("isEmpty must be true\n")
+		}
+	})
 
+	t.Run("Pulling from empty struct queue", func(t *testing.T) {
 		type st struct{}
 
 		stQueue := New[*st]()
 
-		zeroEl2 := stQueue.Pull()
+		zeroEl, isEmpty := stQueue.Pull()
 
-		if zeroEl2 != nil {
-			t.Errorf("zeroEl2 must be nil\n")
+		if zeroEl != nil {
+			t.Errorf("zeroEl must be nil\n")
+		}
+		if !isEmpty {
+			t.Errorf("isEmpty must be true\n")
 		}
 	})
 }
