@@ -13,16 +13,18 @@ import (
 type ProgramConfig struct {
 	siteHomeUrl string
 	getReader   func(string) (io.ReadCloser, error)
+	maxDepth    int8
 }
 
 func main() {
 	sitemapTree := program(&ProgramConfig{
 		siteHomeUrl: "https://www.test.org/",
 		getReader:   utils.GetReaderFromLocalFs,
+		maxDepth:    10,
 	})
 
-	fmt.Println("\nXML Result:")
-	fmt.Print(tree.RenderToXml(sitemapTree))
+	// fmt.Println("\nXML Result:")
+	// fmt.Print(tree.RenderToXml(sitemapTree))
 	fmt.Println("\nResult:")
 	fmt.Print(tree.RenderToString(sitemapTree))
 }
@@ -40,6 +42,7 @@ func program(config *ProgramConfig) *tree.SitemapNode {
 	return tree.BuildLinkTreeBFS(
 		scrapper,
 		config.siteHomeUrl,
+		config.maxDepth,
 	)
 }
 

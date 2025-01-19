@@ -45,9 +45,11 @@ func traverseDFS(
 	return &currentNode
 }
 
+// maxDepth defines the maximum level inclusive. maxDepth condition considered inactive when a negative number is provided
 func BuildLinkTreeBFS(
 	pageScrapper PageScrapper,
 	startUrl string,
+	maxDepth int8,
 ) *SitemapNode {
 	nodeQueue := queue.New[*SitemapNode]()
 	processedUrls := map[string]struct{}{}
@@ -55,6 +57,7 @@ func BuildLinkTreeBFS(
 	rootNode := &SitemapNode{
 		url:      startUrl,
 		children: []*SitemapNode{},
+		level:    0,
 	}
 	nodeQueue.Push(rootNode)
 
@@ -63,8 +66,10 @@ func BuildLinkTreeBFS(
 		if isEmpty {
 			break
 		}
-
 		if _, exists := processedUrls[node.url]; exists {
+			continue
+		}
+		if maxDepth >= 0 && node.level > int(maxDepth) {
 			continue
 		}
 
@@ -72,6 +77,7 @@ func BuildLinkTreeBFS(
 			childNode := &SitemapNode{
 				url:      containedLink,
 				children: []*SitemapNode{},
+				level:    node.level + 1,
 			}
 			node.children = append(node.children, childNode)
 

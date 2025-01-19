@@ -7,4 +7,5 @@ type PageScrapper interface {
 type SitemapNode struct {
 	url      string
 	children []*SitemapNode
+	level    int
 }
