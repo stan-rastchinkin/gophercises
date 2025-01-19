@@ -2,44 +2,37 @@ package tree
 
 import (
 	"fmt"
-	"strconv"
+	"sitemap/tree/queue"
 )
 
-type RegistryLog struct {
-	node  *SitemapNode
-	level uint
-}
-
-func RenderToString(node *SitemapNode) string {
-	return renderToString(
-		node,
-		0,
-		make(map[string]RegistryLog),
-	)
-}
-
-func renderToString(
-	node *SitemapNode,
-	level uint,
-	processedNodesRegestry map[string]RegistryLog,
+func RenderToString(
+	entryNode *SitemapNode,
 ) string {
-	if processedNode, nodeAlreadyProcessed := processedNodesRegestry[node.url]; nodeAlreadyProcessed {
-		return fmt.Sprintf("level %d:\n", level) +
-			node.url +
-			"\nNote: This Node is already rendered at level " +
-			strconv.FormatUint(uint64(processedNode.level), 10) +
-			"\n\n"
-	}
+	nodeQueue := queue.New[*SitemapNode]()
+	processedUrls := map[string]struct{}{}
 
-	result := fmt.Sprintf("level %d:\n", level) + node.url + "\n\n"
+	nodeQueue.Push(entryNode)
 
-	processedNodesRegestry[node.url] = RegistryLog{
-		node:  node,
-		level: level,
-	}
+	result := ""
 
-	for _, child := range node.children {
-		result += renderToString(child, level+1, processedNodesRegestry)
+	for {
+		node, isEmpty := nodeQueue.Pull()
+		if isEmpty {
+			break
+		}
+
+		if _, exists := processedUrls[node.url]; exists {
+			continue
+		}
+
+		result += fmt.Sprintf("url: %s\nchildren: ", node.url)
+		for _, child := range node.children {
+			result += child.url + "  "
+			nodeQueue.Push(child)
+		}
+		result += "\n\n"
+
+		processedUrls[node.url] = struct{}{}
 	}
 
 	return result
